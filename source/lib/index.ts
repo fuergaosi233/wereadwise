@@ -129,11 +129,18 @@ export interface BookProgress {
 export interface MemberCardSummary {}
 
 export interface Shelf2 {
+  archive: Archive[];
   books: Book2[];
   bookProgress: BookProgress[];
   balanceIOS: number;
   balanceAndroid: number;
   memberCardSummary: MemberCardSummary;
+}
+
+export interface Archive {
+  archiveId: string;
+  name: string;
+  bookIds: string[];
 }
 
 export interface RootObject {
@@ -237,7 +244,9 @@ export const SyncAllData = async ({
 }): Promise<void> => {
   setStage('Try to get all infos from weread');
   const value = await getAllInfos();
-  const bookIds = value.shelf.books.map((book) => book.bookId);
+  const bookIds = value.shelf.books
+    .map((book) => book.bookId)
+    .concat(value.shelf.archive.map((archive) => archive.bookIds).flat());
   setBookCount(bookIds.length);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allHighlights: any[] = [];
