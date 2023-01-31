@@ -1,0 +1,20 @@
+@import "../styles/fonts";
+@import "../styles/reset";
+@import "../styles/variables";
+@import '../styles/index';
+
+body {
+  color: $black;
+  background-color: $greyWhite;
+}
+
+
+#popup {
+  min-width: 350px;
+  padding: 10px 10px;
+
+  h2 {
+    font-size: 25px;
+    text-align: center;
+  }
+}
