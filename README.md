@@ -13,9 +13,15 @@
 
 > Change Weread hightlight 2 Readwise
 
-### 🏠 [Homepage]
+### 🏠 Homepage
 
-> Frok by curl https://github.com/abhijithvijayan/web-extension-starter 🙏
+> Fork by curl https://github.com/abhijithvijayan/web-extension-starter 🙏
+## Demo
+<div style = "display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+<img src="./docs/p1.jpeg" width="300" />
+<img src="./docs/p2.jpeg" width="300" />
+<img src="./docs/p3.jpeg" width="400" />
+<div>
 
 ## Prerequisites
 
@@ -23,16 +29,7 @@
 - yarn >= 1.0.0
 
 ## Install
-
-```sh
-yarn install
-```
-
-## Usage
-
-```sh
-build:chrome
-```
+Download from [release]("http://github.com/fuergaosi233/wereadwise/release") or build by yourself
 
 ## Author
 
