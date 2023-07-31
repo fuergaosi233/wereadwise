@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { WEreadDataInfo } from './interface'
 export interface IBookmarkUpdated {
   bookId: string;
   style: number;
@@ -38,135 +38,7 @@ export interface IBookmarkRootObject {
   chapters: IBookmarkChapter[];
   book: IBookmarkBook;
 }
-export interface User {
-  vid: number;
-  skey: string;
-  name: string;
-  avatar: string;
-  gender: number;
-  pf: number;
-}
-
-export interface Vid {
-  vid: number;
-}
-
-export interface User2 {
-  vid: Vid;
-  avatar: string;
-  name: string;
-}
-
-export interface Book {
-  bookId: string;
-  title: string;
-  author: string;
-}
-
-export interface Shelf {
-  books: Book[];
-}
-
-export interface SState {
-  user: User2;
-  shelf: Shelf;
-}
-
-export interface From {
-  name?: unknown;
-  path: string;
-  hash: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  query: {[key: string]: any};
-  // eslint-disable-next-line no-undef, @typescript-eslint/no-explicit-any
-  params: {[key: string]: any};
-  fullPath: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  meta: {[key: string]: any};
-}
-
-export interface Route {
-  path: string;
-  hash: string;
-  query: {[key: string]: unknown};
-  params: {[key: string]: unknown};
-  fullPath: string;
-  meta: {[key: string]: unknown};
-  from: From;
-}
-
-export interface Book2 {
-  bookId: string;
-  title: string;
-  author: string;
-  cover: string;
-  secret: number;
-  format: string;
-  soldout: number;
-  payType: number;
-  finished: number;
-  finishReading: number;
-  lastChapterIdx: number;
-  readUpdateTime: number;
-  updateTime: number;
-  progress: number;
-  updated: number;
-  isTrial: boolean;
-}
-
-export interface BookProgress {
-  bookId: string;
-  progress: number;
-  chapterUid: number;
-  chapterOffset: number;
-  chapterIdx: number;
-  appId: string;
-  updateTime: number;
-  synckey?: number;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MemberCardSummary {}
-
-export interface Shelf2 {
-  archive: Archive[];
-  books: Book2[];
-  bookProgress: BookProgress[];
-  balanceIOS: number;
-  balanceAndroid: number;
-  memberCardSummary: MemberCardSummary;
-}
-
-export interface Archive {
-  archiveId: string;
-  name: string;
-  bookIds: string[];
-}
-
-export interface RootObject {
-  platform: string;
-  deviceInfo: string;
-  httpReferer: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error?: any;
-  user: User;
-  isWhiteTheme: boolean;
-  isNavBarShown: boolean;
-  isFooterShown: boolean;
-  isShelfFullShown: boolean;
-  pageName: string;
-  pageTitle: string;
-  pageKeywords: string;
-  pageDescription: string;
-  pageBodyClass: string;
-  customReaderStyle: string;
-  environment: string;
-  sState: SState;
-  route: Route;
-  shelf: Shelf2;
-}
-
-const getAllInfos = async (): Promise<RootObject> => {
+const getAllInfos = async (): Promise<WEreadDataInfo> => {
   const url = 'https://weread.qq.com/web/shelf';
   const response = await axios.get(url);
   const pageInfo = response.data;
@@ -180,9 +52,13 @@ const getAllInfos = async (): Promise<RootObject> => {
   }
   const valueReg = /\{.*\}/;
   const value = valueReg.exec(initValue)?.[0];
+
+  console.log(valueReg.exec(initValue));
+  console.log(value);
   if (!value) {
     throw new Error('Get info failed');
   }
+
   return JSON.parse(value);
 };
 
@@ -244,7 +120,7 @@ export const SyncAllData = async ({
 }): Promise<void> => {
   setStage('Try to get all infos from weread');
   const value = await getAllInfos();
-  const bookIds = value.shelf.books
+  const bookIds = value.shelf.shelfIndexes
     .map((book) => book.bookId)
     .concat(value.shelf.archive.map((archive) => archive.bookIds).flat());
   setBookCount(bookIds.length);
@@ -254,10 +130,10 @@ export const SyncAllData = async ({
   let allGetCount = 0;
   for (const bookId of bookIds) {
     const bookMarkInfo = await getAllBookMark(bookId, 1);
-    const {updated, book} = bookMarkInfo;
+    const { updated, book } = bookMarkInfo;
     const hightlights = updated.map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (item: {markText: any; range: string; createTime: number}) => {
+      (item: { markText: any; range: string; createTime: number }) => {
         return {
           text: item.markText,
           title: book.title,
@@ -280,6 +156,11 @@ export const SyncAllData = async ({
   }
   console.log(`allHighlights.length: ${allHighlights.length}`);
   console.log(allHighlights);
+  if (allHighlights.length === 0) {
+    setStatus(false);
+    console.log('allHighlights.length === 0');
+    return;
+  }
   setStage('Try to insert all bookmarks to readwise');
   const insertResponse = await insertBookMark2ReadWise(
     accessToken,
@@ -328,7 +209,7 @@ export const getReadwiseAccessToken = async (): Promise<string> => {
 };
 export const getWeReadCookies = (): Promise<chrome.cookies.Cookie[]> => {
   return new Promise<chrome.cookies.Cookie[]>((resolve, reject) => {
-    chrome.cookies.getAll({url: 'https://weread.qq.com/'}, (cookies) => {
+    chrome.cookies.getAll({ url: 'https://weread.qq.com/' }, (cookies) => {
       if (cookies) {
         resolve(cookies);
       } else {
