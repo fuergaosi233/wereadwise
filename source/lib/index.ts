@@ -47,11 +47,11 @@ const getAllInfos = async (): Promise<WEreadDataInfo> => {
   }
   const initValueReg = /window.__INITIAL_STATE__=(\{[\s\S]*?\});/;
   const initValue = initValueReg.exec(pageInfo)?.[0];
-  if (!initValue) {
+    if (!initValue) {
     throw new Error('Get __INITIAL_STATE__ failed');
   }
-  const valueReg = /\{.*\}/;
-  const value = valueReg.exec(initValue)?.[0];
+    const valueReg = /\{.*\}/;
+    const value = valueReg.exec(initValue)?.[0];
 
   console.log(valueReg.exec(initValue));
   console.log(value);
@@ -126,7 +126,7 @@ export const SyncAllData = async ({
   setBookCount(bookIds.length);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allHighlights: any[] = [];
-  setStage('Try to get all bookmarks from weread');
+    setStage('Try to get all bookmarks from weread');
   let allGetCount = 0;
   for (const bookId of bookIds) {
     const bookMarkInfo = await getAllBookMark(bookId, 1);
@@ -135,7 +135,7 @@ export const SyncAllData = async ({
       const hightlights = updated.map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (item: { markText: any; range: string; createTime: number }) => {
-        return {
+          return {
           text: item.markText,
           title: book.title,
           author: book.author,
@@ -159,7 +159,7 @@ export const SyncAllData = async ({
       console.log(error);
     }
   }
-  console.log(`allHighlights.length: ${allHighlights.length}`);
+    console.log(`allHighlights.length: ${allHighlights.length}`);
   console.log(allHighlights);
   if (allHighlights.length === 0) {
     setStatus(false);
