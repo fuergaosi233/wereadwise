@@ -131,7 +131,8 @@ export const SyncAllData = async ({
   for (const bookId of bookIds) {
     const bookMarkInfo = await getAllBookMark(bookId, 1);
     const { updated, book } = bookMarkInfo;
-    const hightlights = updated.map(
+    try {
+      const hightlights = updated.map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (item: { markText: any; range: string; createTime: number }) => {
         return {
@@ -145,14 +146,18 @@ export const SyncAllData = async ({
           location: Number(item.range.split('-')[0]),
           location_type: 'order',
           highlighted_at: new Date(item.createTime * 1000).toISOString(),
-        };
-      }
-    );
-    allGetCount += 1;
-    setStage(
-      `Try to get all bookmarks from weread, ${book.title} ${allGetCount}/${bookIds.length}`
-    );
-    allHighlights = allHighlights.concat(hightlights);
+          };
+        }
+      );
+      allGetCount += 1;
+      setStage(
+        `Try to get all bookmarks from weread, ${book.title} ${allGetCount}/${bookIds.length}`
+      );
+      allHighlights = allHighlights.concat(hightlights);
+    } catch (error) {
+      console.log(`Error when reading book: ${bookId}`);
+      console.log(error);
+    }
   }
   console.log(`allHighlights.length: ${allHighlights.length}`);
   console.log(allHighlights);
