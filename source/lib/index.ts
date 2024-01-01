@@ -47,17 +47,17 @@ const getAllInfos = async (): Promise<WEreadDataInfo> => {
   }
   const initValueReg = /window.__INITIAL_STATE__=(\{[\s\S]*?\});/;
   const initValue = initValueReg.exec(pageInfo)?.[0];
-  if (!initValue) {
+    if (!initValue) {
     throw new Error('Get __INITIAL_STATE__ failed');
   }
-  const valueReg = /\{.*\}/;
-  const value = valueReg.exec(initValue)?.[0];
+    const valueReg = /\{.*\}/;
+    const value = valueReg.exec(initValue)?.[0];
 
   console.log(valueReg.exec(initValue));
   console.log(value);
   if (!value) {
     throw new Error('Get info failed');
-  }
+    }
 
   return JSON.parse(value);
 };
@@ -120,21 +120,22 @@ export const SyncAllData = async ({
 }): Promise<void> => {
   setStage('Try to get all infos from weread');
   const value = await getAllInfos();
-  const bookIds = value.shelf.shelfIndexes
+    const bookIds = value.shelf.shelfIndexes
     .map((book) => book.bookId)
     .concat(value.shelf.archive.map((archive) => archive.bookIds).flat());
   setBookCount(bookIds.length);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allHighlights: any[] = [];
-  setStage('Try to get all bookmarks from weread');
+    setStage('Try to get all bookmarks from weread');
   let allGetCount = 0;
   for (const bookId of bookIds) {
     const bookMarkInfo = await getAllBookMark(bookId, 1);
     const { updated, book } = bookMarkInfo;
-    const hightlights = updated.map(
+    try {
+      const hightlights = updated.map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (item: { markText: any; range: string; createTime: number }) => {
-        return {
+          return {
           text: item.markText,
           title: book.title,
           author: book.author,
@@ -145,16 +146,20 @@ export const SyncAllData = async ({
           location: Number(item.range.split('-')[0]),
           location_type: 'order',
           highlighted_at: new Date(item.createTime * 1000).toISOString(),
-        };
-      }
-    );
-    allGetCount += 1;
-    setStage(
-      `Try to get all bookmarks from weread, ${book.title} ${allGetCount}/${bookIds.length}`
-    );
-    allHighlights = allHighlights.concat(hightlights);
+          };
+        }
+      );
+      allGetCount += 1;
+      setStage(
+        `Try to get all bookmarks from weread, ${book.title} ${allGetCount}/${bookIds.length}`
+      );
+      allHighlights = allHighlights.concat(hightlights);
+    } catch (error) {
+      console.log(`Error when reading book: ${bookId}`);
+      console.log(error);
+    }
   }
-  console.log(`allHighlights.length: ${allHighlights.length}`);
+    console.log(`allHighlights.length: ${allHighlights.length}`);
   console.log(allHighlights);
   if (allHighlights.length === 0) {
     setStatus(false);
