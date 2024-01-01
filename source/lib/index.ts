@@ -57,7 +57,7 @@ const getAllInfos = async (): Promise<WEreadDataInfo> => {
   console.log(value);
   if (!value) {
     throw new Error('Get info failed');
-    }
+  }
 
   return JSON.parse(value);
 };
@@ -120,7 +120,7 @@ export const SyncAllData = async ({
 }): Promise<void> => {
   setStage('Try to get all infos from weread');
   const value = await getAllInfos();
-    const bookIds = value.shelf.shelfIndexes
+  const bookIds = value.shelf.shelfIndexes
     .map((book) => book.bookId)
     .concat(value.shelf.archive.map((archive) => archive.bookIds).flat());
   setBookCount(bookIds.length);
